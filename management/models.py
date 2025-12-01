@@ -54,7 +54,7 @@ class Task(models.Model):
 	sprint = models.ForeignKey(Sprint, on_delete=models.CASCADE, related_name='tasks')
 	title = models.CharField(max_length=255)
 	description = models.TextField(blank=True)
-	assignee = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tasks')
+	assignees = models.ManyToManyField(User, related_name='tasks')
 	start_date = models.DateField(null=True, blank=True)
 	due_date = models.DateField(null=True, blank=True)
 	status = models.CharField(max_length=20, choices=Status.choices, default=Status.TO_DO)

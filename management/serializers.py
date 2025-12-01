@@ -1,7 +1,6 @@
 from rest_framework import serializers
-
 from .models import Project, Sprint, Task
-
+from accounts.models import User
 
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
@@ -36,7 +35,13 @@ class SprintSerializer(serializers.ModelSerializer):
         ]
 
 
+
 class TaskSerializer(serializers.ModelSerializer):
+    assignees = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=User.objects.all()
+    )
+
     class Meta:
         model = Task
         fields = [
@@ -44,7 +49,7 @@ class TaskSerializer(serializers.ModelSerializer):
             'sprint',
             'title',
             'description',
-            'assignee',
+            'assignees',  
             'start_date',
             'due_date',
             'status',

@@ -1,10 +1,24 @@
-from rest_framework.routers import DefaultRouter
+from django.urls import path
+from .views import (
+    ProjectListCreateAPIView,
+    ProjectDetailAPIView,
+    SprintListCreateAPIView,
+    SprintDetailAPIView,
+    TaskListCreateAPIView,
+    TaskDetailAPIView,
+    MyTasksAPIView,
+    TaskStatusUpdateAPIView,
+)
 
-from .views import ProjectViewSet, SprintViewSet, TaskViewSet
+urlpatterns = [
+    path('projects/', ProjectListCreateAPIView.as_view(), name='project-list-create'),
+    path('projects/<int:pk>/', ProjectDetailAPIView.as_view(), name='project-detail'),
 
-router = DefaultRouter()
-router.register('projects', ProjectViewSet, basename='project')
-router.register('sprints', SprintViewSet, basename='sprint')
-router.register('tasks', TaskViewSet, basename='task')
+    path('sprints/', SprintListCreateAPIView.as_view(), name='sprint-list-create'),
+    path('sprints/<int:pk>/', SprintDetailAPIView.as_view(), name='sprint-detail'),
 
-urlpatterns = router.urls
+    path('tasks/', TaskListCreateAPIView.as_view(), name='task-list-create'),
+    path('tasks/<int:pk>/', TaskDetailAPIView.as_view(), name='task-detail'),
+    path('tasks/my/', MyTasksAPIView.as_view(), name='my-tasks'),
+    path('tasks/<int:pk>/change-status/', TaskStatusUpdateAPIView.as_view(), name='task-change-status'),
+]
