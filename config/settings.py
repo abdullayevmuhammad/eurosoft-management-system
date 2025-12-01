@@ -59,8 +59,11 @@ INSTALLED_APPS = [
 ]
 
 INSTALLED_APPS += [
+    # installed apps
     'rest_framework',
     'corsheaders',
+    'drf_yasg',
+    # created apps
     'accounts',
     'management',
 ]
