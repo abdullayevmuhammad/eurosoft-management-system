@@ -24,3 +24,11 @@ class UserCreateSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+
+class UserPasswordResetSerializer(serializers.Serializer):
+    password = serializers.CharField(write_only=True, min_length=6)
+
+    def validate_password(self, value):
+        if len(value) < 6:
+            raise serializers.ValidationError("Password must be at least 6 characters.")
+        return value

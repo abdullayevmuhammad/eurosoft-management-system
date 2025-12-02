@@ -1,18 +1,18 @@
 from django.db import models
 from django.conf import settings
-
+from accounts.models import SoftDeleteModel
 User = settings.AUTH_USER_MODEL
 
 
-class Project(models.Model):
+class Project(SoftDeleteModel):
 	class Status(models.TextChoices):
 		STARTED = 'STARTED', 'Started'
 		COMPLETED = 'COMPLETED', 'Completed'
 		ON_HOLD = 'ON_HOLD', 'On Hold'
 
 	title = models.CharField(max_length=255)
-	start_date = models.DateField(null=True, blank=True)
-	end_date = models.DateField(null=True, blank=True)
+	start_date = models.DateTimeField(null=True, blank=True)
+	end_date = models.DateTimeField(null=True, blank=True)
 	status = models.CharField(max_length=20, choices=Status.choices, default=Status.STARTED)
 	pm = models.ForeignKey(User, on_delete=models.CASCADE, related_name='managed_projects')
 
@@ -23,7 +23,7 @@ class Project(models.Model):
 		return self.title
 
 
-class Sprint(models.Model):
+class Sprint(SoftDeleteModel):
 	class Status(models.TextChoices):
 		OPEN = 'OPEN', 'Open'
 		IN_PROGRESS = 'IN_PROGRESS', 'In Progress'
@@ -31,7 +31,7 @@ class Sprint(models.Model):
 
 	project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='sprints')
 	name = models.CharField(max_length=100)
-	start_date = models.DateField()
+	start_date = models.DateTimeField()
 	duration_days = models.PositiveIntegerField(default=7)
 	status = models.CharField(max_length=20, choices=Status.choices, default=Status.OPEN)
 
@@ -42,7 +42,7 @@ class Sprint(models.Model):
 		return f"{self.project.title} - {self.name}"
 
 
-class Task(models.Model):
+class Task(SoftDeleteModel):
 	class Status(models.TextChoices):
 		TO_DO = 'TO_DO', 'To Do'
 		IN_PROGRESS = 'IN_PROGRESS', 'In Progress'
@@ -55,9 +55,10 @@ class Task(models.Model):
 	title = models.CharField(max_length=255)
 	description = models.TextField(blank=True)
 	assignees = models.ManyToManyField(User, related_name='tasks')
-	start_date = models.DateField(null=True, blank=True)
-	due_date = models.DateField(null=True, blank=True)
+	start_date = models.DateTimeField(null=True, blank=True)
+	due_date = models.DateTimeField(null=True, blank=True)
 	status = models.CharField(max_length=20, choices=Status.choices, default=Status.TO_DO)
+	image = models.ImageField(upload_to='task_images/', null=True, blank=True)
 
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)

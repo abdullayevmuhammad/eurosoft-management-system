@@ -2,7 +2,7 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-from .views import MeView, UserListCreateAPIView, UserDetailAPIView
+from .views import MeView, UserListCreateAPIView, UserDetailAPIView, UserPasswordResetAPIView
 
 urlpatterns = [
     # JWT auth
@@ -15,4 +15,7 @@ urlpatterns = [
     # Ichki user boshqaruvi (OWNER, PM)
     path('accounts/users/', UserListCreateAPIView.as_view(), name='user-list-create'),
     path('accounts/users/<int:pk>/', UserDetailAPIView.as_view(), name='user-detail'),
+
+    # reset password
+    path('accounts/users/<int:pk>/reset-password/', UserPasswordResetAPIView.as_view(), name='user-reset-password'),
 ]

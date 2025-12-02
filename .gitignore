@@ -85,3 +85,4 @@ celerybeat-schedule
 # OS files
 .DS_Store
 Thumbs.db
+migrations/

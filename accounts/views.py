@@ -8,15 +8,17 @@ from rest_framework.exceptions import PermissionDenied
 from .models import User
 from .serializers import UserSerializer, UserCreateSerializer
 from .permissions import IsOwnerOrPM
-
+from drf_yasg.utils import swagger_auto_schema
 
 class MeView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(responses={200: UserSerializer()})
     def get(self, request):
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
 
+    @swagger_auto_schema(request_body=UserSerializer, responses={200: UserSerializer()})
     def patch(self, request):
         serializer = UserSerializer(request.user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
@@ -25,15 +27,7 @@ class MeView(APIView):
 
 
 class UserListCreateAPIView(generics.ListCreateAPIView):
-    """
-    GET  /accounts/users/  -> Owner va PM userlarni ko'radi
-    POST /accounts/users/  -> Owner/PM yangi user qo'shadi
 
-    RBAC:
-    - OWNER: istalgan rol (OWNER, PM, DEV, VIEWER) yaratishi mumkin
-    - PM: faqat DEV (va xohlasang VIEWER) yaratishi mumkin
-    - DEV/VIEWER: umuman kira olmaydi (IsOwnerOrPM bloklaydi)
-    """
     queryset = User.objects.all()
     permission_classes = [IsOwnerOrPM]
 
@@ -61,16 +55,7 @@ class UserListCreateAPIView(generics.ListCreateAPIView):
 
 
 class UserDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
-    """
-    GET    /accounts/users/<id>/
-    PATCH  /accounts/users/<id>/
-    DELETE /accounts/users/<id>/
 
-    RBAC:
-    - OWNER: hamma userni ko'radi va tahrir qiladi
-    - PM: faqat DEV/VIEWER userlarni tahrir/o'chirishi mumkin
-    - DEV/VIEWER: kira olmaydi
-    """
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsOwnerOrPM]
@@ -90,3 +75,29 @@ class UserDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
         if editor.role == User.Role.PM and instance.role in (User.Role.OWNER, User.Role.PM):
             raise PermissionDenied("PM OWNER yoki boshqa PM ni o'chira olmaydi.")
         instance.delete()
+
+from .serializers import UserPasswordResetSerializer
+from drf_yasg.utils import swagger_auto_schema
+
+class UserPasswordResetAPIView(generics.UpdateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserPasswordResetSerializer
+    permission_classes = [IsOwnerOrPM]
+
+    @swagger_auto_schema(request_body=UserPasswordResetSerializer)
+    def patch(self, request, pk=None):
+        editor: User = request.user
+        target: User = self.get_object()
+
+        # PM cheklovlari
+        if editor.role == User.Role.PM and target.role in (User.Role.OWNER, User.Role.PM):
+            raise PermissionDenied("PM OWNER yoki PM parolini o'zgartira olmaydi.")
+
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        new_password = serializer.validated_data["password"]
+        target.set_password(new_password)
+        target.save(update_fields=["password"])
+
+        return Response({"detail": "Password successfully reset."})

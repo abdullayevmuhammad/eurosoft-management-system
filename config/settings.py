@@ -66,6 +66,7 @@ INSTALLED_APPS += [
     # created apps
     'accounts',
     'management',
+    'audit',
 ]
 
 MIDDLEWARE = [
@@ -172,3 +173,14 @@ REST_FRAMEWORK = {
 }
 
 AUTH_USER_MODEL = 'accounts.User'
+
+SWAGGER_SETTINGS = {
+    'USE_SESSION_AUTH': False,
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header',
+        },
+    },
+}
