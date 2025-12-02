@@ -86,3 +86,4 @@ celerybeat-schedule
 .DS_Store
 Thumbs.db
 migrations/
+task_images/
